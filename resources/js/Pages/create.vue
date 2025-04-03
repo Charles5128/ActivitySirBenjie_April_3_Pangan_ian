@@ -1,4 +1,4 @@
-<template>
+<!-- <template>
   <Layout>
       <div class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
           <h2 class="text-2xl font-semibold text-center text-blue-600">Create a New Product</h2>
@@ -68,4 +68,46 @@ const submitProduct = () => {
       });
   }
 };
-</script>
+</script> -->
+<template>
+    <Layout>
+      <div class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h2 class="text-2xl font-semibold text-center text-blue-600">Create a New Product</h2>
+        <form @submit.prevent="submitProduct" class="space-y-4">
+          <div v-for="(label, key) in fields" :key="key">
+            <label class="block text-gray-700">{{ label }}</label>
+            <input v-if="key !== 'description'" v-model="form[key]" :type="key === 'price' || key === 'quantity' ? 'number' : 'text'" 
+              class="w-full p-2 border rounded-lg" required />
+            <textarea v-else v-model="form[key]" class="w-full p-2 border rounded-lg" required></textarea>
+            <p v-if="errors[key]" class="text-red-500 text-sm">{{ errors[key] }}</p>
+          </div>
+          <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700">Add Product</button>
+        </form>
+      </div>
+    </Layout>
+  </template>
+  
+  <script setup>
+  import { ref } from 'vue';
+  import { router } from '@inertiajs/vue3';
+  import Layout from '../Layouts/Layout.vue';
+  
+  const form = ref({ name1: '', description: '', price: '', quantity: '' });
+  const errors = ref({});
+  const fields = { name1: "Product Name", description: "Description", price: "Price (PHP)", quantity: "Quantity" };
+  
+  const submitProduct = () => {
+    errors.value = {};
+    Object.keys(form.value).forEach(key => {
+      if (!form.value[key]) errors.value[key] = `${fields[key]} is required.`;
+    });
+  
+    if (!Object.keys(errors.value).length) {
+      router.post('/products', form.value, {
+        onSuccess: () => (form.value = { name1: '', description: '', price: '', quantity: '' }),
+        onError: (error) => (errors.value = error)
+      });
+    }
+  };
+  </script>
+  
